@@ -23,6 +23,7 @@ jobs:
         run: |
           pwd
           ls -l
+          cd src
           make distclean
           make
           make clean
