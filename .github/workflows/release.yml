@@ -1,21 +1,39 @@
+name: 
+
 on:
-  release:
-    types: [created]
-name: Handle Release
+  push:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
 jobs:
-  generate:
-    name: Create release-artifacts
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-20.04
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@master
-      - name: Generate the artifacts
-        uses: skx/github-action-build@master
-        with:
-           builder: .github/build
-      - name: Upload the artifacts
-        uses: skx/github-action-publish-binaries@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: 'src/pcprint'
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          sudo apt-get update
+          sudo apt install libusb-1.0-0-dev
+          sudo apt install libieee1284-3-dev
+          sudo apt install libcurl4-openssl-dev
+          sudo apt install libsndfile1-dev
+          sudo apt install libasound-dev
+          sudo apt install libudev-dev
+          sudo apt-get install fpc
+          pwd
+          ls -l
+          cd src
+          make distclean
+          make
+          make clean
+          ./pcprint
+          echo Done
