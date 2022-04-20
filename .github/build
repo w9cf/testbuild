@@ -1,11 +1,11 @@
 #Build script
 apt-get update
-apt install libusb-1.0-0-dev
-apt install libieee1284-3-dev
-apt install libcurl4-openssl-dev
-apt install libsndfile1-dev
-apt install libasound-dev
-apt install libudev-dev
+#apt install libusb-1.0-0-dev
+#apt install libieee1284-3-dev
+#apt install libcurl4-openssl-dev
+#apt install libsndfile1-dev
+#apt install libasound-dev
+#apt install libudev-dev
 apt-get install fpc
 pwd
 ls -l
