@@ -1,5 +1,5 @@
 #Build script
-apt-get update
+#apt-get update
 #apt install libusb-1.0-0-dev
 #apt install libieee1284-3-dev
 #apt install libcurl4-openssl-dev
