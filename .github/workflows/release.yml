@@ -1,27 +1,18 @@
-name: 
-
 on:
-  push:
-    branches: [ master ]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
+  release:
+    types: [created]
+name: Handle Release
 jobs:
-  build:
-    runs-on: ubuntu-20.04
+  generate:
+    name: Create release-artifacts
+    runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
+      - name: Checkout the repository
+        uses: actions/checkout@master
+      - name: Generate the artifacts
+        run : |
           sudo apt-get update
+          sudo apt install -y jq
           sudo apt install libusb-1.0-0-dev
           sudo apt install libieee1284-3-dev
           sudo apt install libcurl4-openssl-dev
@@ -37,3 +28,59 @@ jobs:
           make clean
           ./pcprint
           echo Done
+          cd ..
+      - name: Upload the artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+           if [ -z "${INPUT_RELEASEID}" ]; then
+              RELEASE_ID=$(jq --raw-output '.release.id' "$GITHUB_EVENT_PATH")
+              echo "Discovered RELEASE_ID: ${RELEASE_ID}"
+           else
+              RELEASE_ID="${INPUT_RELEASEID}"
+              echo "Using supplied RELEASE_ID: ${RELEASE_ID}"
+           fi
+
+           for file in src/pcprint; do
+              if [ ! -s "$file" ]; then
+                 echo "**************************"
+                 echo " file is empty - skipping."
+                 echo "**************************"
+                 continue
+              fi
+              FILENAME=$(basename "${file}")
+              UPLOAD_URL="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${FILENAME}"
+              echo "Upload URL is ${UPLOAD_URL}"
+              tmp=$(mktemp)
+              response=$(curl \
+                 -sSL \
+                 -XPOST \
+                 -H "${AUTH_HEADER}" \
+                 --upload-file "${file}" \
+                 --header "Content-Type:application/octet-stream" \
+                 --write-out "%{http_code}" \
+                 --output $tmp \
+                 "${UPLOAD_URL}")
+              if [ "$?" -ne 0 ]; then
+                 echo "**********************************"
+                 echo " curl command did not return zero."
+                 echo " Aborting"
+                 echo "**********************************"
+                 cat $tmp
+                 rm $tmp
+                 exit 1
+              fi
+
+              if [ $response -ge 400 ]; then
+                 echo "***************************"
+                 echo " upload was not successful."
+                 echo " Aborting"
+                 echo " HTTP status is $response"
+                 echo "**********************************"
+                 cat $tmp
+                 rm $tmp
+                 exit 1
+              fi
+              cat $tmp | jq .
+              rm $tmp
+           done
