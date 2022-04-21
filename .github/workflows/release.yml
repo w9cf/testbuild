@@ -54,6 +54,7 @@ jobs:
               echo "Upload URL is ${UPLOAD_URL}"
               tmp=$(mktemp)
               response=$(curl \
+                 --http1.1 \
                  -sSL \
                  -XPOST \
                  -H "${AUTH_HEADER}" \
