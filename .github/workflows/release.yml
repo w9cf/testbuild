@@ -13,6 +13,7 @@ jobs:
         run : |
           sudo apt-get update
           sudo apt install -y jq
+          sudo apt install curl
           sudo apt install libusb-1.0-0-dev
           sudo apt install libieee1284-3-dev
           sudo apt install libcurl4-openssl-dev
