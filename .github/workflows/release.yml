@@ -13,13 +13,13 @@ jobs:
         run : |
           sudo apt-get update
           sudo apt install -y jq
-          sudo apt install curl
-          sudo apt install libusb-1.0-0-dev
-          sudo apt install libieee1284-3-dev
-          sudo apt install libcurl4-openssl-dev
-          sudo apt install libsndfile1-dev
-          sudo apt install libasound-dev
-          sudo apt install libudev-dev
+#          sudo apt install curl
+#          sudo apt install libusb-1.0-0-dev
+#          sudo apt install libieee1284-3-dev
+#          sudo apt install libcurl4-openssl-dev
+#          sudo apt install libsndfile1-dev
+#          sudo apt install libasound-dev
+#          sudo apt install libudev-dev
           sudo apt-get install fpc
           pwd
           ls -l
@@ -31,59 +31,12 @@ jobs:
           echo Done
           cd ..
       - name: Upload the artifacts
+        uses: actions/upload-release-asset@v1
         env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: |
-           if [ -z "${INPUT_RELEASEID}" ]; then
-              RELEASE_ID=$(jq --raw-output '.release.id' "$GITHUB_EVENT_PATH")
-              echo "Discovered RELEASE_ID: ${RELEASE_ID}"
-           else
-              RELEASE_ID="${INPUT_RELEASEID}"
-              echo "Using supplied RELEASE_ID: ${RELEASE_ID}"
-           fi
-
-           for file in src/pcprint; do
-              if [ ! -s "$file" ]; then
-                 echo "**************************"
-                 echo " file is empty - skipping."
-                 echo "**************************"
-                 continue
-              fi
-              FILENAME=$(basename "${file}")
-              UPLOAD_URL="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${FILENAME}"
-              echo "Upload URL is ${UPLOAD_URL}"
-              tmp=$(mktemp)
-              response=$(curl \
-                 --http1.1 \
-                 -sSL \
-                 -XPOST \
-                 -H "${AUTH_HEADER}" \
-                 --upload-file "${file}" \
-                 --header "Content-Type:application/octet-stream" \
-                 --write-out "%{http_code}" \
-                 --output $tmp \
-                 "${UPLOAD_URL}")
-              if [ "$?" -ne 0 ]; then
-                 echo "**********************************"
-                 echo " curl command did not return zero."
-                 echo " Aborting"
-                 echo "**********************************"
-                 cat $tmp
-                 rm $tmp
-                 exit 1
-              fi
-
-              if [ $response -ge 400 ]; then
-                 echo "***************************"
-                 echo " upload was not successful."
-                 echo " Aborting"
-                 echo " HTTP status is $response"
-                 echo "**********************************"
-                 cat $tmp
-                 rm $tmp
-                 exit 1
-              fi
-              cat $tmp | jq .
-              rm $tmp
-           done
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        with:
+           upload_url: ${{ github.event.release.upload_url }}
+           asset_path: src/pcprint
+           asset_name: pcprint
+           asset_content_type: application/octet-stream
