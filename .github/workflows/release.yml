@@ -28,3 +28,12 @@ jobs:
            ./pcprint
            echo Done
            cd ..
+      - name: Upload the artifacts
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/upload-release-asset@v1
+        with:
+           upload_url: ${{ github.event.release.upload_url }}
+           asset_path: src/pcprint
+           asset_name: pcprint
+           asset_content_type: application/octet-stream
