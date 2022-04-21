@@ -32,7 +32,8 @@ jobs:
           cd ..
       - name: Upload the artifacts
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
            if [ -z "${INPUT_RELEASEID}" ]; then
               RELEASE_ID=$(jq --raw-output '.release.id' "$GITHUB_EVENT_PATH")
