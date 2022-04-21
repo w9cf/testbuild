@@ -11,15 +11,5 @@ jobs:
         uses: actions/checkout@master
       - name: Generate the artifacts
         run : |
-          sudo apt-get update
-          sudo apt install -y jq
-#          sudo apt install curl
-#          sudo apt install libusb-1.0-0-dev
-#          sudo apt install libieee1284-3-dev
-#          sudo apt install libcurl4-openssl-dev
-#          sudo apt install libsndfile1-dev
-#          sudo apt install libasound-dev
-#          sudo apt install libudev-dev
-          sudo apt-get install fpc
-          pwd
-          ls -l
+           pwd
+           ls -l
